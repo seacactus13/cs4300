@@ -240,6 +240,6 @@ This project is for educational purposes as part of CS4300/5300 coursework.
 
 ## 👨‍💻 Author
 
-[Your Name]  
+Enzo Knapp 
 CS4300/5300 - Homework 2  
 University of Colorado Colorado Springs
