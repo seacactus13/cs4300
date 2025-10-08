@@ -1,0 +1,45 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Available Movies - CinemaBook{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 mb-4">🎥 Now Showing</h1>
+        <p class="lead" style="color: #b3b3b3;">Choose your movie and book your perfect seat</p>
+    </div>
+</div>
+
+<div class="row">
+    {% if movies %}
+        {% for movie in movies %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-warning">{{ movie.title }}</h5>
+                    <p class="card-text flex-grow-1">{{ movie.description }}</p>
+                    <div class="movie-info mb-3">
+                        <p class="mb-1" style="color: #b3b3b3;">
+                            <strong>📅 Release:</strong> {{ movie.release_date|date:"F d, Y" }}
+                        </p>
+                        <p class="mb-0" style="color: #b3b3b3;">
+                            <strong>⏱️ Duration:</strong> {{ movie.duration }} minutes
+                        </p>
+                    </div>
+                    <a href="{% url 'book_seat' movie.id %}" class="btn btn-primary w-100">
+                        Book Seats
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h4>No movies available at the moment</h4>
+                <p>Please check back later or contact the administrator.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Book Seat - {{ movie.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 15px;
+        margin: 2rem 0;
+    }
+    
+    .seat-btn {
+        padding: 1rem;
+        border: 2px solid #444;
+        background-color: #2a2a2a;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .seat-btn:hover:not(.booked) {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+    
+    .seat-btn.booked {
+        background-color: #555;
+        color: #888;
+        cursor: not-allowed;
+        border-color: #555;
+    }
+    
+    .seat-btn.selected {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .screen {
+        background: linear-gradient(to bottom, #666, #333);
+        padding: 10px;
+        text-align: center;
+        margin-bottom: 3rem;
+        border-radius: 8px 8px 0 0;
+        box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+    }
+    
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .legend-box {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <a href="{% url 'movie_list' %}" class="btn btn-outline-light mb-3">
+            ← Back to Movies
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-warning">{{ movie.title }}</h2>
+                <p class="card-text">{{ movie.description }}</p>
+                <p class="mb-0" style="color: #b3b3b3;">
+                    <strong>Duration:</strong> {{ movie.duration }} minutes | 
+                    <strong>Release Date:</strong> {{ movie.release_date|date:"F d, Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">Select Your Seat</h3>
+        
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: #2a2a2a; border: 2px solid #444;"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: var(--primary-color);"></div>
+                <span>Selected</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background-color: #555;"></div>
+                <span>Booked</span>
+            </div>
+        </div>
+        
+        <!-- Screen -->
+        <div class="screen">
+            <h5 class="mb-0 text-white">🎬 SCREEN</h5>
+        </div>
+        
+        <!-- Seat Grid -->
+        <form method="POST" id="booking-form">
+            {% csrf_token %}
+            <div class="seat-grid">
+                {% for seat in seats %}
+                    <button 
+                        type="button" 
+                        class="seat-btn {% if seat.booking_status == 'booked' %}booked{% endif %}"
+                        data-seat-id="{{ seat.id }}"
+                        {% if seat.booking_status == 'booked' %}disabled{% endif %}
+                        onclick="selectSeat(this, {{ seat.id }})">
+                        {{ seat.seat_number }}
+                    </button>
+                {% endfor %}
+            </div>
+            
+            <input type="hidden" name="seat_id" id="selected-seat-id">
+            
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="confirm-btn" disabled>
+                    Confirm Booking
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let selectedSeatId = null;
+
+function selectSeat(button, seatId) {
+    // Remove previous selection
+    document.querySelectorAll('.seat-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    // Select current seat
+    button.classList.add('selected');
+    selectedSeatId = seatId;
+    
+    // Update hidden input and enable confirm button
+    document.getElementById('selected-seat-id').value = seatId;
+    document.getElementById('confirm-btn').disabled = false;
+}
+
+// Prevent form submission if no seat selected
+document.getElementById('booking-form').addEventListener('submit', function(e) {
+    if (!selectedSeatId) {
+        e.preventDefault();
+        alert('Please select a seat first!');
+    }
+});
+</script>
+{% endblock %}
